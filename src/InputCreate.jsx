@@ -1,41 +1,52 @@
-import React, { useState } from 'react';
+import { useState } from 'react'
 
-function InputCreate({ onTaskCreate }) {
-  const [task, setTask] = useState('');
+function InputCreate () {
+  const [title, setTitle] = useState('')
+  const [res, setRes] = useState('Por ahora no')
 
-  const handleInputChange = (e) => {
-    setTask(e.target.value);
-  };
+  const handleSubmit = async (event) => {
+    event.preventDefault()
 
-  const handleSubmit = async () => {
-    if (task.trim()) {
-      try {
-        const urlApi = 'http://localhost:5000/create'; // Asegúrate de que la URL es correcta
-        const payload = { title: task };
-        const response = await fetch(urlApi, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(payload),
-        });
+    const urlApi = import.meta.env.VITE_APP_API_URL+'create'
+    const payload = { title }
 
-        if (response.ok) {
-          setTask('');
-          onTaskCreate();
-        }
-      } catch (error) {
-        console.error('Error al enviar la tarea:', error);
-      }
+    try {
+      const response = await fetch(urlApi, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      })
+      const data = await response.json()
+      setRes(data.title)
+      setTitle('')
+    } catch (error) {
+      console.log(error)
     }
-  };
+  }
+
+  const handleChange = (e) => {
+    setTitle(e.target.value)
+  }
+ 
 
   return (
-    <div>
-      <input type="text" value={task} onChange={handleInputChange} placeholder="Add a new task" />
-      <button onClick={handleSubmit}>Enviar</button>
-    </div>
-  );
+    <>
+    <form onSubmit={handleSubmit}>
+      <input
+        type='text'
+        placeholder='añade tu tarea'
+        value={title}
+        onChange={handleChange}
+        required
+      />
+      <button type="submit">Añade tarea</button>
+    </form>
+    <div>{`Se ha enviado: ${res}`}</div>
+
+    </>
+  )
 }
 
-export default InputCreate;
+export default InputCreate
